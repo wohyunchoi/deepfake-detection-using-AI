@@ -2,7 +2,7 @@ import torch
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 from safetensors.torch import load_file
-from model import HybridDeepfakeDetector
+from model import HybridDeepfakeDetector_XS, HybridDeepfakeDetector_ES
 from sklearn.metrics import classification_report
 
 # Hyperparameter
@@ -16,12 +16,12 @@ transform = transforms.Compose([
 ])
 
 # Dataset
-test_dataset = datasets.ImageFolder("path/to/test", transform=transform)
+test_dataset = datasets.ImageFolder("./archive/test", transform=transform)
 test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
 # Model
-model = HybridDeepfakeDetector(num_classes=2).to(DEVICE)
-checkpoint = load_file("checkpoint_epoch_10.safetensors")
+model = HybridDeepfakeDetector_XS(num_classes=2).to(DEVICE)
+checkpoint = load_file("XS_ckpt/checkpoint_epoch_10.safetensors")
 model.load_state_dict(checkpoint["model"])
 model.eval()
 
