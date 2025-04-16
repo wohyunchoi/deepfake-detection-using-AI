@@ -10,7 +10,7 @@ if __name__ == '__main__':
     from torch.utils.data import DataLoader
     from torchvision import datasets, transforms
     from safetensors.torch import save_file, load_file
-    from model import HybridDeepfakeDetector_XS, HybridDeepfakeDetector_ES
+    from model import XceptionDeepfakeDetector, HybridDeepfakeDetector_XS, HybridDeepfakeDetector_ES
     import os
     import argparse
     from torch.amp import autocast, GradScaler
@@ -43,7 +43,9 @@ if __name__ == '__main__':
 
     # Model
     model_class = args.model_class
-    if model_class == "XS":
+    if model_class == "X":
+        model = XceptionDeepfakeDetector(num_classes=2).to(DEVICE)
+    elif model_class == "XS":
         model = HybridDeepfakeDetector_XS(num_classes=2).to(DEVICE)
     elif model_class == "ES":
         model = HybridDeepfakeDetector_ES(num_classes=2).to(DEVICE)

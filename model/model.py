@@ -3,6 +3,29 @@ import torch.nn as nn
 import torchvision.models as models
 from timm import create_model
 
+class XceptionDeepfakeDetector(nn.Module):
+    def __init__(self, num_classes=2):
+        super(XceptionDeepfakeDetector, self).__init__()
+        # XceptionNet
+        self.backbone = create_model("xception", pretrained=False, num_classes=0)
+        self.classifier = nn.Linear(self.backbone.num_features, num_classes)
+
+        # Xavier Initialization
+        self._initialize_weights()
+
+    def forward(self, x):
+        features = self.backbone(x)
+        out = self.classifier(features)
+        return out
+
+    def _initialize_weights(self):
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
+                nn.init.xavier_uniform_(m.weight)
+                if m.bias is not None:
+                    nn.init.constant_(m.bias, 0)
+
+
 class HybridDeepfakeDetector_XS(nn.Module):
     def __init__(self, num_classes=2):
         super(HybridDeepfakeDetector_XS, self).__init__()
