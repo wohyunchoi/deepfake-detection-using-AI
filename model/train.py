@@ -10,7 +10,7 @@ if __name__ == '__main__':
     from torch.utils.data import DataLoader
     from torchvision import datasets, transforms
     from safetensors.torch import save_file, load_file
-    from model import XceptionDeepfakeDetector, HybridDeepfakeDetector_XS, HybridDeepfakeDetector_ES
+    from model import XceptionDeepfakeDetector, SwinDeepfakeDetector, HybridDeepfakeDetector_XS, HybridDeepfakeDetector_ES
     import os
     import argparse
     from torch.amp import autocast, GradScaler
@@ -18,7 +18,7 @@ if __name__ == '__main__':
     # Argument Parse
     parser = argparse.ArgumentParser(description="Train Hybrid Deepfake Detector")
     parser.add_argument("-e", "--start-epoch", type=int, default=0, help="Start epoch (for resuming training)")
-    parser.add_argument("-m", "--model-class", type=str, default="XS", choices=["XS", "ES"],
+    parser.add_argument("-m", "--model-class", type=str, default="X", choices=["X", "S", "XS", "ES"],
                         help="Model class to use: XS or ES")
     args = parser.parse_args()
 
@@ -45,12 +45,14 @@ if __name__ == '__main__':
     model_class = args.model_class
     if model_class == "X":
         model = XceptionDeepfakeDetector(num_classes=2).to(DEVICE)
+    elif model_class == "S":
+        model = SwinDeepfakeDetector(num_classes=2).to(DEVICE)
     elif model_class == "XS":
         model = HybridDeepfakeDetector_XS(num_classes=2).to(DEVICE)
     elif model_class == "ES":
         model = HybridDeepfakeDetector_ES(num_classes=2).to(DEVICE)
     else:
-        model = HybridDeepfakeDetector_XS(num_classes=2).to(DEVICE)
+        model = XceptionDeepfakeDetector(num_classes=2).to(DEVICE)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=LR)
 
@@ -70,6 +72,7 @@ if __name__ == '__main__':
             f.write("Epoch, Train_Loss, Val_Acc, TP, TN, FP, FN, Precision, Recall, F1\n")
 
     print(f"Train Start - Model:{model_class}, Epoch:{start_epoch+1}")
+
     # Train & Validation
     for epoch in range(start_epoch, EPOCHS):
         # Train

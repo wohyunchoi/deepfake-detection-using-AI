@@ -6,7 +6,7 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 from safetensors.torch import load_file
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
-from model import HybridDeepfakeDetector_XS, HybridDeepfakeDetector_ES
+from model import XceptionDeepfakeDetector, HybridDeepfakeDetector_XS, HybridDeepfakeDetector_ES
 from torch.amp import autocast
 import torch.nn.functional as F
 
@@ -40,7 +40,7 @@ def test(model, test_loader, device):
 if __name__ == '__main__':
     # Argument Parse
     parser = argparse.ArgumentParser(description="Test Hybrid Deepfake Detector")
-    parser.add_argument("-m", "--model-class", type=str, default="XS", choices=["XS", "ES"], help="Model class to use")
+    parser.add_argument("-m", "--model-class", type=str, default="X", choices=["X", "XS", "ES"], help="Model class to use")
     parser.add_argument("-c", "--checkpoint", type=str, required=True, help="Path to model checkpoint (.safetensors)")
     args = parser.parse_args()
 
@@ -61,12 +61,14 @@ if __name__ == '__main__':
 
     # Model
     model_class = args.model_class
-    if model_class == "XS":
+    if model_class == "X":
+        model = XceptionDeepfakeDetector(num_classes=2).to(DEVICE)
+    elif model_class == "XS":
         model = HybridDeepfakeDetector_XS(num_classes=2).to(DEVICE)
     elif model_class == "ES":
         model = HybridDeepfakeDetector_ES(num_classes=2).to(DEVICE)
     else:
-        model = HybridDeepfakeDetector_XS(num_classes=2).to(DEVICE)
+        model = XceptionDeepfakeDetector(num_classes=2).to(DEVICE)
 
     # Load checkpoint
     state_dict = load_file(args.checkpoint)

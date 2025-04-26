@@ -26,6 +26,27 @@ class XceptionDeepfakeDetector(nn.Module):
                     nn.init.constant_(m.bias, 0)
 
 
+class SwinDeepfakeDetector(nn.Module):
+    def __init__(self, num_classes=2):
+        super(SwinDeepfakeDetector, self).__init__()
+        #Swin Transformer
+        self.backbone = create_model('swin_base_patch4_window7_224', pretrained=False, num_classes=num_classes)
+
+        # Xavier Initialization
+        self._init_weights()
+
+    def forward(self, x):
+        return self.backbone(x)
+
+    def _init_weights(self):
+        for m in self.modules():
+            if isinstance(m, (nn.Linear, nn.Conv2d)):
+                nn.init.xavier_uniform_(m.weight)
+                if m.bias is not None:
+                    nn.init.zeros_(m.bias)
+
+
+
 class HybridDeepfakeDetector_XS(nn.Module):
     def __init__(self, num_classes=2):
         super(HybridDeepfakeDetector_XS, self).__init__()
